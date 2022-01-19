@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
+use Response;
+
 
 class ProductosController extends Controller
 {
@@ -37,26 +40,45 @@ class ProductosController extends Controller
      */
     public function store(Request $request)
     {
+        $response = array('state'=>false,'message'=>'success');
 
-        $request->validate ([
-            'name' => 'required',
-            'img' => 'required|image|mimes:jpg,jpeg,png,git,svg|max:2000',
-            'price' => 'required'
+        $data = $request->input();
+
+        $vld = Validator::make($data, [
+            'name' => ['required', 'max:100'],
+            'img' => ['image','mimes:jpg,jpeg,png,git,svg', 'max:2000'],
+            'price' => ['required'],
+            // "img" => ['required','array'],
+            // "img.*" => ["required",'image','mimes:jpeg,png','max:3000'],
         ]);
-        $imagen = $request -> file('img');
-        $nombre = time().'.'.$imagen->getClientOriginalExtension();
-        $destino = public_path('img\productos');
-        $request->img->move($destino, $nombre);
+            
+        if ($vld->fails()) {
+            $response['message'] = $vld->errors()->first(); 
+            return Response::json($response); 
+        }
         
-            $product = new Product();
-            $product->user_id = auth()->user()->id;
-            $product->name = $request->name;
-            $product->img = 'img/productos/'.$nombre;
-            $product->price = $request->price;    
-            if($product->save()){ 
-                return response()->json([ [1] ]);                   	
+        
+            
+            $imagen = $request -> file('img');
+            if(empty($imagen)){
+                $response['message'] = 'El campo imagen es obligatorio.';
+                return Response::json($response);
             } else {
-                return response()->json([ [3] ]);
+                $product = new Product();
+
+                $nombre = time().'.'.$imagen->getClientOriginalExtension();
+                $destino = public_path('img\productos');
+                $request->img->move($destino, $nombre);
+
+                $product->img = 'img/productos/'.$nombre;
+                $product->user_id = auth()->user()->id;
+                $product->name = $request->name;
+                $product->price = $request->price;    
+                $product->save();
+                $response['state'] = true;
+                $response['token'] = auth()->user()->api_token;
+                $response['user'] = auth()->user();
+                return Response::json($response);
             }
 
     }
@@ -94,15 +116,28 @@ class ProductosController extends Controller
     public function update(Request $request)
 
     {
-        $request->validate ([
-            'name_edit' => 'required',
-            'price_edit' => 'required'
+        $response = array('state'=>false,'message'=>'success');
+
+        $data = $request->input();
+
+        $vld = Validator::make($data, [
+            'name_edit' => ['required', 'max:100'],
+            'price_edit' => ['required'],
         ]);
+            
+        if ($vld->fails()) {
+            $response['message'] = $vld->errors()->first(); 
+            return Response::json($response); 
+        }
+        
         $user_id = auth()->user()->id;    
         $product = Product::where('user_id', $user_id)->findOrfail($request->item_id); //recuperará el primer resultado de la consulta            $product->user_id = auth()->user()->id;
         
-        if($request->img_edit != ''){
-            $imagen = $request -> file('img_edit');
+        $imagen = $request -> file('img_edit');
+        if(empty($imagen)){
+            // $response['message'] = 'El campo imagen es obligatorio.';
+            // return Response::json($response);
+        } else {
             $nombre = time().'.'.$imagen->getClientOriginalExtension();
             $destino = public_path('img\productos');
             $request->img_edit->move($destino, $nombre);
@@ -111,11 +146,11 @@ class ProductosController extends Controller
         } 
             $product->name = $request->name_edit;
             $product->price = $request->price_edit;    
-            if($product->save()){ 
-                return response()->json([ [1] ]);                   	
-            } else {
-                return response()->json([ [3] ]);
-            }
+            $product->save();
+            $response['state'] = true;
+            $response['token'] = auth()->user()->api_token;
+            $response['user'] = auth()->user();
+            return Response::json($response);
         
     }
 
@@ -127,8 +162,22 @@ class ProductosController extends Controller
      */
     public function destroy(Request $request)
     {
-        $product = Product::destroy($request->item_delete);
-        return $product;
+        $response = array('state'=>false,'message'=>'success');
+
+        $user_id = auth()->user()->id; 
+        $validar = Product::where('user_id', $user_id)->findOrfail($request->item_delete)->count();
+        if($validar == 1){
+            $product = Product::destroy($request->item_delete);
+            $response['state'] = true;
+            $response['token'] = auth()->user()->api_token;
+            $response['user'] = auth()->user();
+            return Response::json($response);
+        } else {
+            $response['message'] = 'Ha ocurrido un error al borrar';
+            $response['token'] = auth()->user()->api_token;
+            $response['user'] = auth()->user();
+            return Response::json($response);
+        }
     }
 }
 

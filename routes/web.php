@@ -24,8 +24,9 @@ Route::get('/productos', [ProductosController::class, 'index'])->name('productos
 Route::get('/', [UsersController::class, 'index'])->name('user.login');
 Route::get('/register', [UsersController::class, 'register'])->name('user.register');
 Route::post('/register', [UsersController::class, 'saveRegister'])->name('save.register');
+Route::post('/edit_register', [UsersController::class, 'editRegister'])->name('edit.register');
 Route::get('/logout', [UsersController::class, 'logout'])->name('user.logout');
-
+Route::get('/actualizar-datos', [UsersController::class, 'updateLogin'])->name('update.login');
 Route::post('/save_product', [ProductosController::class, 'store'])->name('save.product');
 Route::post('/delete_product', [ProductosController::class, 'destroy'])->name('delete.product');
 Route::post('/productos_item', [ProductosController::class, 'show'])->name('edit.product');

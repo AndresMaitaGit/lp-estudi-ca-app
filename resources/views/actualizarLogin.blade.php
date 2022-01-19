@@ -17,11 +17,6 @@
         <style>
                         
             /* BASIC */
-
-            html {
-            background-color: #56baed;
-            }
-
             body {
             font-family: "Poppins", sans-serif;
             height: 100vh;
@@ -133,7 +128,7 @@
             transform: scale(0.95);
             }
 
-            input[type=text], input[type=password] {
+            input[type=text], input[type=email], input[type=password] {
             background-color: #f6f6f6;
             border: none;
             color: #0d0d0d;
@@ -153,13 +148,19 @@
             -webkit-border-radius: 5px 5px 5px 5px;
             border-radius: 5px 5px 5px 5px;
             }
+            .invalid, .invalid-feedback{
+                text-align: left;
+                font-size: 14px;
+                margin-left: 40px;
+                color:red
+            }
 
-            input[type=text]:focus, input[type=password]:focus {
+            input[type=text]:focus,input[type=email]:focus, input[type=password]:focus {
             background-color: #fff;
             border-bottom: 2px solid #e11a29;
             }
 
-            input[type=text]:placeholder, input[type=password]:placeholder {
+            input[type=text]:placeholder, input[type=email]:placeholder, input[type=password]:placeholder {
             color: #cccccc;
             }
 
@@ -270,12 +271,7 @@
 
 
             /* OTHERS */
-            .invalid, .invalid-feedback{
-                text-align: left;
-                font-size: 14px;
-                margin-left: 40px;
-                color:red
-            }
+
             *:focus {
                 outline: none;
             } 
@@ -288,6 +284,31 @@
         </style>
     </head>
     <body>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+              <ul class="navbar-nav mr-auto">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      Cuenta 
+                    </a>
+                    <div class="dropdown-menu" style="right:0;" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="{{ route('update.login') }}">Actualizar Datos</a>
+                      <a class="dropdown-item" href="{{ route('user.logout') }}">Cerrar Sesión</a>
+                    </div>
+                </li>
+              </ul>
+              <div class="form-inline my-2 my-lg-0">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                    <a class="nav-link disabled" href="#">Bienvenido {{ auth()->user()->name }}</a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+        </nav>
         <div class="wrapper fadeInDown">
             <div id="formContent">
               <!-- Tabs Titles -->
@@ -296,48 +317,54 @@
               <div class="fadeIn first">
                 <img src="{!! asset('img/logo.png') !!}" id="icon" class="logo p-3" />
               </div>
+              <h2>Actualizar datos</h2>
               <div id="err" style="color: red">
 
 
               </div>
               <!-- Login Form -->
-              <form name="frm_login" id="frm_login">
+              <form name="frm_login" id="frm_login" method="POST"  class="needs-validation" enctype="multipart/form-data" validate>
                 @csrf
                 <div class="form-group">
-                    <input type="text" id="email" class="fadeIn second" name="email" placeholder="email">
-                    <div class="invalid-feedback ">Ingresar Email</div>
+                    <input type="text" id="name" class="fadeIn second form-control" name="name" placeholder="name" value="{{ auth()->user()->name }}" required>
+                    <div class="invalid-feedback" >Ingresar Nombre</div>
                 </div>
                 <div class="form-group">
-                    <input type="password" id="password" class="fadeIn third" name="password" placeholder="password">
+                    <input type="email" id="email" class="fadeIn second form-control" name="email" placeholder="email" value="{{ auth()->user()->email }}" readonly>
+                    <div class="invalid-feedback ">Ingresar email</div>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="password" class="fadeIn third form-control" name="password" placeholder="password" required>
                     <div class="invalid-feedback ">Ingresar contraseña</div>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="confirm_password" class="fadeIn third form-control" name="confirm_password" placeholder="Confirmar password" required>
+                    <div class="invalid-feedback ">Deben coincidir las contraseñas</div>
                     <div class="invalid"></div>
-                </div>    
-                <input type="button" class="fadeIn fourth"  id="enviar_datos" value="Iniciar sesión">
-              </form>
-          
-              <!-- Remind Passowrd -->
-              <div id="formFooter">
-                <a class="underlineHover" href="{{route('user.register')}}">Crear una cuenta nueva</a>
-              </div>
-          
+                </div>
+                <input type="button" class="fadeIn fourth" id="enviar_registro" value="Actualizar datos">
+            </form>
             </div>
-          </div>
-
+        </div>
+ 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
     <script src="//cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js" integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  </body>
     
     <script>
-    
-        $("#enviar_datos").click(function(event) {
+        $("#enviar_registro").click(function(event) {
             event.preventDefault();
             let validacion = true;
-            if($('#email').val() == ""){
-                $('#email_validacion').html('Ingrese email');
-                $('#email').addClass("is-invalid");
+            var data = $("#frm_login").serialize();
+            if($('#name').val() == ""){
+                $('#name').addClass("is-invalid");
                 validacion = false;
             } else{
-                $('#email').removeClass("is-invalid").addClass("was-validated");
+                $('#name').removeClass("is-invalid").addClass("was-validated");
             }
             
             if($('#password').val() == "" || $('#password').val().length < 8){
@@ -346,25 +373,43 @@
             } else{
                 $('#password').removeClass("is-invalid").addClass("was-validated");
             }
+            if($('#password').val() == "" || $('#password').val() !== $('#confirm_password').val() ){
+                $('#confirm_password').addClass("is-invalid");
+                validacion = false;
+            } else{
+                $('#confirm_password').removeClass("is-invalid").addClass("was-validated");
+            }
             if(validacion !== false){
-                var data = $("#frm_login").serialize();
-    
-                $.ajax({
-                    type: 'POST',
-                    url: '{{route('login.check')}}',
-                    data: data,
-                    dataType: 'json',
-                    headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-                    success: function(response){
-                        console.log(response);
-                        if(response['state'] == true){
-                          window.location.replace('{{route('productos.index')}}');
-                        
-                        } else if(response['state'] == false){
-                            $('.invalid').html('*'+ response['message']);
-                        }
+
+            $.ajax({
+                type: 'POST',
+                url: '{{route('edit.register')}}',
+                data: data,
+                dataType: 'json',
+		        headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                success: function(response){
+                    console.log(response);
+                    console.log(response['state']);
+                    // console.log(response['message']);
+                    if(response['state'] == true){
+                        Swal.fire({
+                        title: '!Datos Actualizado exitosamente!',
+                        text: '',
+                        icon: 'success',
+                        showConfirmButton: false
+                        });
+                    window.location.replace('{{route('user.login')}}');
+                    } else if(response['state'] == false){
+                        $('.invalid').html('*'+ response['message']);
                     }
-                });
+                    
+                },
+                error: function(response){
+                    console.log("error");
+                    console.log(response);
+                  
+                }
+            });
             }
         });
     

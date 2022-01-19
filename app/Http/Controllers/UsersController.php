@@ -6,6 +6,9 @@ use App\Models\Product;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
+use Response;
 
 class UsersController extends Controller
 {
@@ -38,38 +41,65 @@ class UsersController extends Controller
     }
     public function saveRegister(Request $request)
     {
-        $request->validate ([
-            'name' => 'required|max:100',
-            'email' => 'required|max:100',
-            'password' => 'required',
-            'confirm_password' => 'required'
+        $response = array('state'=>false,'message'=>'success');
+
+        $data = $request->input();
+            
+        $vld = Validator::make($data, [
+            'name' => ['required', 'max:100'],
+            'email' => ['required', 'string', 'email','unique:users', 'max:100'],
+            'password' => ['required', 'string', 'max:50', 'min:8'],
+            'confirm_password' => ['required','min:8', 'same:password']
         ]);
-        // url: '{{route('save.register')}}',
-        $email = $request->email; 
-        if (User::where('email', $email)->exists()){
-            return response()->json([ [2] ]);
-        } else{
-                $user = new User();
-                $user->name = $request->name;
-                $user->email = $request->email;
-                $user->password = Bcrypt($request->password);
-            if($user->save()){ 
-                return response()->json([ [1] ]);                   	
-            } else {
-                return response()->json([ [3] ]);
-            }
+            
+        if ($vld->fails()) {
+            $response['message'] = $vld->errors()->first(); 
+            return Response::json($response); 
         }
+        // url: '{{route('save.register')}}',
+        // $email = $request->email; 
+            $user = new User();
+            $user->name = $request->name;
+            $user->email = $request->email;
+            $user->password = Bcrypt($request->password);
+            $token = Str::random(40);
+            $user->api_token =   hash('sha256', $token);
+            $user->save();
+            $response['state'] = true;
+            $response['token'] = $user->api_token;
+            $response['user'] = $user;
+            return Response::json($response);
+
+
     }
     public function check(Request $request)
     {  
+        $response = array('state'=>false,'message'=>'success');
+
+        $data = $request->input();
+            
+        $vld = Validator::make($data, [
+            'email' => ['required', 'email'],
+            'password' => ['required'],
+        ]);
+            
+        if ($vld->fails()) {
+            $response['message'] = $vld->errors()->first(); 
+            return Response::json($response); 
+        }
+
         $email = $request->email;
         $pass  = $request->password;
 
         if (auth()->attempt(array('email' => $email, 'password' => $pass))){
-            return response()->json([ [1] ]);
+            $response['state'] = true;
+            $response['token'] = auth()->user()->api_token;
+            $response['user'] = auth()->user();
+            return Response::json($response);
         } 
         else{  
-            return response()->json([ [3] ]);
+            $response['message'] = 'Email o contraseña invalidos';
+            return Response::json($response);
          }  
     }
     public function logout(Request $request) 
@@ -82,67 +112,47 @@ class UsersController extends Controller
     
         return redirect('/');
     }
+    public function updateLogin() 
+    {
+        if (Auth::check()) {
+            return view('actualizarLogin');
+        } else {
+            return view('login');
+        }
+    }
+        public function editRegister(Request $request)
+    {
+        $response = array('state'=>false,'message'=>'success');
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+        $data = $request->input();
+            
+        $vld = Validator::make($data, [
+            'name' => ['required', 'max:100'],
+            'password' => ['required', 'string', 'max:50', 'min:8'],
+            'confirm_password' => ['required','min:8', 'same:password']
+        ]);
+            
+        if ($vld->fails()) {
+            $response['message'] = $vld->errors()->first(); 
+            return Response::json($response); 
+        }
+        // url: '{{route('save.register')}}',
+        // $email = $request->email; 
+        if (Auth::check()) {
+            $user = User::findOrfail(auth()->user()->id);
+            $user->name = $request->name;
+            $user->password = Bcrypt($request->password);
+            $user->save();
+            $response['state'] = true;
+            $response['token'] = $user->api_token;
+            $response['user'] = $user;
+            return Response::json($response);
+        } else {
+            $response['message']='debe iniciar sesion';
+            return Response::json($response); 
+        }
+
+
+    }
     
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
-    }
 }

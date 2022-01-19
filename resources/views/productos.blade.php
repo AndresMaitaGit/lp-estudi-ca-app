@@ -228,6 +228,12 @@ table.table .avatar {
 }	
 .modal form label {
 	font-weight: normal;
+}
+.invalid-add,.invalid-edit,.invalid-delete, .invalid-feedback{
+    /* text-align: left; */
+    font-size: 14px;
+    /* margin-left: 40px; */
+    color:red
 }	
 </style>
 <script>
@@ -254,6 +260,7 @@ $(document).ready(function(){
                   Cuenta 
                 </a>
                 <div class="dropdown-menu" style="right:0;" aria-labelledby="navbarDropdown">
+                    <a class="dropdown-item" href="{{ route('update.login') }}">Actualizar Datos</a>
                   <a class="dropdown-item" href="{{ route('user.logout') }}">Cerrar Sesión</a>
                 </div>
             </li>
@@ -329,13 +336,14 @@ $(document).ready(function(){
 					</div>
 					<div class="form-group">
 						<label>Foto</label>
-						<input type="file" class="form-control" name="img" id="img" required>
+						<input type="file" accept="image/jpeg,image/png" class="form-control" name="img" id="img">
                         <div class="invalid-feedback"></div>
 					</div>
 					<div class="form-group">
 						<label>Precio</label>
 						<input type="number" class="form-control" name="price" id="price" required>
                         <div class="invalid-feedback"></div>
+                        <div class="invalid-add"></div>
 					</div>					
 				</div>
 				<div class="modal-footer">
@@ -369,13 +377,14 @@ $(document).ready(function(){
 					</div>
 					<div class="form-group">
 						<label>Foto</label>
-						<input type="file" class="form-control" name="img_edit" id="img_edit" >
+                        <input accept="image/jpeg,image/png" class="form-control" multiple type="file" name="img_edit">
                         <div class="invalid-feedback"></div>
 					</div>
 					<div class="form-group">
 						<label>Precio</label>
 						<input type="number" class="form-control" name="price_edit" id="price_edit" >
                         <div class="invalid-feedback"></div>
+                        <div class="invalid-edit"></div>
 					</div>					
 				</div>
 				<div class="modal-footer">
@@ -400,6 +409,7 @@ $(document).ready(function(){
 				<div class="modal-body">					
 					<p>¿Estas seguro de eliminar este producto?</p>
 				</div>
+                <div class="invalid-delete"></div>
 				<div class="modal-footer">
 					<input type="button" class="btn btn-default" data-dismiss="modal" value="Cancelar">
 					<input type="button" class="btn btn-danger" id="delete_product" value="Eliminar">
@@ -490,7 +500,7 @@ $(document).ready(function(){
 		        headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
                 success: function(response){
                     console.log(response);
-                    if(response == 1){
+                    if(response['state'] == true){
                         Swal.fire({
                         title: '!Producto Guardado exitosamente!',
                         text: '',
@@ -498,8 +508,8 @@ $(document).ready(function(){
                         showConfirmButton: false
                         });
                         setTimeout(refresh, 2000); 
-                    } else if(response == 3){
-                        console.log(response);
+                    } else if(response['state'] == false){
+                        $('.invalid-add').html('*'+ response['message']);
                     }
                     
                 },
@@ -514,12 +524,12 @@ $(document).ready(function(){
         $("#edit_producto").click(function(event) {
             event.preventDefault();
             let validacion = true;
-            if($('#name_edit').val() == ""){
-                $('#name_edit').addClass("is-invalid");
-                validacion = false;
-            } else{
-                $('#name_edit').removeClass("is-invalid").addClass("was-validated");
-            }
+            // if($('#name_edit').val() == ""){
+            //     $('#name_edit').addClass("is-invalid");
+            //     validacion = false;
+            // } else{
+            //     $('#name_edit').removeClass("is-invalid").addClass("was-validated");
+            // }
             // if($('#img_edit').val() == ""){
             //     $('#img_edit').addClass("is-invalid");
             //     validacion = false;
@@ -527,12 +537,12 @@ $(document).ready(function(){
             //     $('#img_edit').removeClass("is-invalid").addClass("was-validated");
             // }
             
-            if($('#price_edit').val() == ""){
-                $('#price_edit').addClass("is-invalid");
-                validacion = false;
-            } else{
-                $('#price_edit').removeClass("is-invalid").addClass("was-validated");
-            }
+            // if($('#price_edit').val() == ""){
+            //     $('#price_edit').addClass("is-invalid");
+            //     validacion = false;
+            // } else{
+            //     $('#price_edit').removeClass("is-invalid").addClass("was-validated");
+            // }
             var myformData = new FormData(document.getElementById("frm_edit"));
             if(validacion !== false){
 
@@ -547,16 +557,16 @@ $(document).ready(function(){
 		        headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
                 success: function(response){
                     console.log(response);
-                    if(response == 1){
+                    if(response['state'] == true){
                         Swal.fire({
-                        title: '!Producto Guardado exitosamente!',
+                        title: '!Producto Actualizado exitosamente!',
                         text: '',
                         icon: 'success',
                         showConfirmButton: false
                         });
                         setTimeout(refresh, 2000); 
-                    } else if(response == 3){
-                        console.log(response);
+                    } else if(response['state'] == false){
+                        $('.invalid-edit').html('*'+ response['message']);
                     }
                     
                 },
@@ -589,7 +599,7 @@ $(document).ready(function(){
 		        headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
                 success: function(response){
                     console.log(response);
-                    if(response == 1){
+                    if(response['state'] == true){
                         Swal.fire({
                         title: '!Producto Eliminado exitosamente!',
                         text: '',
@@ -597,8 +607,8 @@ $(document).ready(function(){
                         showConfirmButton: false
                         });
                         setTimeout(refresh, 2000); 
-                    } else if(response == 3){
-                        console.log(response);
+                    } else if(response['state'] == false){
+                        $('.invalid-delete').html('*'+ response['message']);
                     }
                     
                 },

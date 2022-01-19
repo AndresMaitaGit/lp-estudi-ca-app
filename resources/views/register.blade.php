@@ -148,10 +148,11 @@
             -webkit-border-radius: 5px 5px 5px 5px;
             border-radius: 5px 5px 5px 5px;
             }
-            .invalid-feedback{
+            .invalid, .invalid-feedback{
                 text-align: left;
-                font-size: 12px;
+                font-size: 14px;
                 margin-left: 40px;
+                color:red
             }
 
             input[type=text]:focus,input[type=email]:focus, input[type=password]:focus {
@@ -301,21 +302,22 @@
                 @csrf
                 <div class="form-group">
                     <input type="text" id="name" class="fadeIn second form-control" name="name" placeholder="name" required>
-                    <div class="invalid-feedback">Introduzca su nombre</div>
+                    <div class="invalid-feedback ">Ingresar Nombre</div>
                 </div>
                 <div class="form-group">
                     <input type="email" id="email" class="fadeIn second form-control" name="email" placeholder="email" required>
-                    <div class="invalid-feedback" id="email_validacion">Ingrese email</div>
+                    <div class="invalid-feedback ">Ingresar email</div>
                 </div>
                 <div class="form-group">
                     <input type="password" id="password" class="fadeIn third form-control" name="password" placeholder="password" required>
-                    <div class="invalid-feedback">Ingrese una contraseña mayor o igual de 8 caracteres</div>
+                    <div class="invalid-feedback ">Ingresar contraseña</div>
                 </div>
                 <div class="form-group">
                     <input type="password" id="confirm_password" class="fadeIn third form-control" name="confirm_password" placeholder="Confirmar password" required>
-                    <div class="invalid-feedback  ">deben coincidir las contraseñas</div>
+                    <div class="invalid-feedback ">Deben coincidir las contraseñas</div>
+                    <div class="invalid"></div>
                 </div>
-                <input type="button" class="fadeIn fourth" id="enviar_registro" value="Iniciar sesión">
+                <input type="button" class="fadeIn fourth" id="enviar_registro" value="Registrarse">
             </form>
               
               <div id="formFooter">
@@ -336,6 +338,7 @@
         $("#enviar_registro").click(function(event) {
             event.preventDefault();
             let validacion = true;
+            var data = $("#frm_login").serialize();
             if($('#name').val() == ""){
                 $('#name').addClass("is-invalid");
                 validacion = false;
@@ -362,7 +365,6 @@
             } else{
                 $('#confirm_password').removeClass("is-invalid").addClass("was-validated");
             }
-            var data = $("#frm_login").serialize();
             if(validacion !== false){
 
             $.ajax({
@@ -373,7 +375,9 @@
 		        headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
                 success: function(response){
                     console.log(response);
-                    if(response == 1){
+                    console.log(response['state']);
+                    // console.log(response['message']);
+                    if(response['state'] == true){
                         Swal.fire({
                         title: '!Registrado exitosamente!',
                         text: 'Ya puedes ingresar a tu cuenta',
@@ -381,11 +385,8 @@
                         showConfirmButton: false
                         });
                     window.location.replace('{{route('user.login')}}');
-                    } else if(response == 2){
-                        $('#email_validacion').html('Email ya registrado');
-                        $('#email').addClass("is-invalid");
-                    } else if(response == 3){
-                        console.log(response);
+                    } else if(response['state'] == false){
+                        $('.invalid').html('*'+ response['message']);
                     }
                     
                 },
