@@ -408,8 +408,8 @@ $(document).ready(function(){
 				</div>
 				<div class="modal-body">					
 					<p>¿Estas seguro de eliminar este producto?</p>
+                    <div class="invalid-delete"></div>
 				</div>
-                <div class="invalid-delete"></div>
 				<div class="modal-footer">
 					<input type="button" class="btn btn-default" data-dismiss="modal" value="Cancelar">
 					<input type="button" class="btn btn-danger" id="delete_product" value="Eliminar">

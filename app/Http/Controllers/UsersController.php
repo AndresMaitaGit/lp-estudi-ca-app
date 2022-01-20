@@ -19,20 +19,15 @@ class UsersController extends Controller
      */
     public function index()
     {
-        //
-        if (Auth::check()) {
-            $productos = Product::all();
-            return view('productos', compact('productos'));
-        } else {
-            return view('login');
-        }
+        return view('login');
 
     }
     public function register()
     {
         //
         if (Auth::check()) {
-            $productos = Product::all();
+            $user_id = auth()->user()->id;
+            $productos = Product::all()->where('user_id', $user_id);
             return view('productos', compact('productos'));
         } else {
             return view('register');
@@ -92,9 +87,14 @@ class UsersController extends Controller
         $pass  = $request->password;
 
         if (auth()->attempt(array('email' => $email, 'password' => $pass))){
+            $user = User::findOrfail(auth()->user()->id);
+            $user->password = Bcrypt($request->password);
+            $token = Str::random(40);
+            $user->api_token =   hash('sha256', $token);
+            $user->save();
             $response['state'] = true;
-            $response['token'] = auth()->user()->api_token;
-            $response['user'] = auth()->user();
+            $response['token'] = $user->api_token;
+            $response['user'] = $user;
             return Response::json($response);
         } 
         else{  
@@ -104,6 +104,9 @@ class UsersController extends Controller
     }
     public function logout(Request $request) 
     {
+        $user = User::findOrfail(auth()->user()->id);
+        $user->api_token =  NULL;
+        $user->save();
         Auth::logout();
 
         $request->session()->invalidate();

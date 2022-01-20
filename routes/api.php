@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:api')->get('/login', function (Request $request) {
-    $response = array('state'=>true,'message'=>'success');
-    return $response;
-});
+// Route::middleware('auth:api')->get('/login', function (Request $request) {
+//     $response = array('state'=>true,'message'=>'success');
+//     return $response;
+// });

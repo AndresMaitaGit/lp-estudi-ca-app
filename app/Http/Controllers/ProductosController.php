@@ -13,13 +13,9 @@ class ProductosController extends Controller
 {
     public function index()
     {
-        if (Auth::check()) {
-            $user_id = auth()->user()->id;
-            $productos = Product::all()->where('user_id', $user_id);
-            return view('productos', compact('productos'));
-        } else {
-            // return view('login');
-        }
+        $user_id = auth()->user()->id;
+        $productos = Product::all()->where('user_id', $user_id);
+        return view('productos', compact('productos'));
     }
 
     /**
@@ -165,7 +161,8 @@ class ProductosController extends Controller
         $response = array('state'=>false,'message'=>'success');
 
         $user_id = auth()->user()->id; 
-        $validar = Product::where('user_id', $user_id)->findOrfail($request->item_delete)->count();
+        $product_id = $request->item_delete;
+        $validar = Product::where('user_id', $user_id)->where('id', $product_id)->count();
         if($validar == 1){
             $product = Product::destroy($request->item_delete);
             $response['state'] = true;
