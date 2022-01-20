@@ -87,16 +87,13 @@ class ApiUserController extends Controller
     }
     public function logout(Request $request) 
     {
+        $response = array('state'=>false,'message'=>'success');
         $user = User::findOrfail(auth()->user()->id);
         $user->api_token =  NULL;
         $user->save();
-        Auth::logout();
-
-        $request->session()->invalidate();
-    
-        $request->session()->regenerateToken();
-    
-        return redirect('/');
+        $response['state'] = true;
+        $response['message'] = 'Sesion Cerrada, Token Eliminado.';
+        return Response::json($response);
     }
     public function updateLogin() 
     {

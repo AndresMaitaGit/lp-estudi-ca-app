@@ -260,6 +260,7 @@ $(document).ready(function(){
                   Cuenta 
                 </a>
                 <div class="dropdown-menu" style="right:0;" aria-labelledby="navbarDropdown">
+                    <a class="dropdown-item" href="{{ route('productos.index') }}">Productos</a>
                     <a class="dropdown-item" href="{{ route('update.login') }}">Actualizar Datos</a>
                   <a class="dropdown-item" href="{{ route('user.logout') }}">Cerrar Sesión</a>
                 </div>
